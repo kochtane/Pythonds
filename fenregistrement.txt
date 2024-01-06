@@ -1,0 +1,57 @@
+PE1#conf t
+PE1(config)# router bgp 100
+PE1(config-router)#no bgp default ipv4-unicast
+PE1(config-router)# neighbor 2.2.2.2 remote-as 100
+PE1(config-router)# neighbor 2.2.2.2 update-source loopback 0
+PE1(config-router)# address-family vpnv4 unicast
+PE1(config-router-af)# neighbor 2.2.2.2 activate
+PE1(config-router-af)# neighbor 2.2.2.2 send community both
+PE1(config-router-af)#address-family ipv4 vrf VPN_Customer1
+PE1(config-router-af)#redistribute ospf 100 vrf VPN_Customer1
+PE1(config-router-af)#address-family ipv4 vrf VPN_Customer2
+PE1(config-router-af)#redistribute ospf 200 vrf VPN_Customer2
+PE1(config-router-af)#exit
+PE1(config-router)#exit
+PE1(config)#router ospf 100 vrf VPN_Customer1
+PE1(config-router)# redistribute bgp 100 subnets
+PE1(config-router)# network 192.168.1.0 0.0.0.3 area 11
+PE1(config)#router ospf 200 vrf VPN_Customer2
+PE1(config-router)# redistribute bgp 100 subnets
+PE1(config-router)# network 192.168.1.4 0.0.0.3 area 21
+
+
+
+
+CE11# conf t
+CE11(config)# interface Loopback 0
+CE11(config-if)#ip address 172.16.11.11 255.255.255.255
+CE11(config-if)#interface g1/0
+CE11 (config-if)#ip address 192.168.1.1 255.255.255.252
+CE11(config-if)#no shutdown
+CE11(config)# router ospf 1
+CE11(config-router)# network 192.168.1.0 0.0.0.3 area 11
+CE11(config-router)# network 172.16.11.11 0.0.0.0 area 11
+
+
+
+PE1(config)# ip vrf VPN_Customer1
+PE1(config-vrf)#rd 100 :1
+PE1(config-vrf)# route-target both 100:1
+PE1(config)# ip vrf VPN_Customer2
+PE1(config-vrf)#rd 100 :2
+PE1(config-vrf)# route-target both 100:2
+
+PE1(config)#interface g3/0
+PE1(config-if)#ip vrf forwarding VPN_Customer1
+PE1(config-if)#ip address 192.168.1.1 255.255.255.252
+PE1(config-if)#no shutdown
+PE1(config)#interface g4/0
+PE1(config-if)#ip vrf forwarding VPN_Customer2
+PE1(config-if)#ip address 192.168.1.5 255.255.255.252
+PE1(config-if)#no shutdown
+
+
+python projet :
+creattion interface graphique 
+publickey
+privekey
